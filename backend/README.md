@@ -1,24 +1,28 @@
 # Student Management REST API
 
-Aplikasi manajemen data siswa berbasis REST API. Dokumentasi ini ditulis selangkah demi selangkah, jadi kalau kamu baru belajar Node.js/Express, ikuti saja urutannya dari atas ke bawah.
+REST API untuk mengelola data **siswa** dan **user** (login), dibuat dengan Node.js, Express, dan MySQL. API ini dipakai oleh aplikasi mobile Flutter di folder `../frontend`.
 
 ## Daftar Isi
 
 1. [Deskripsi Aplikasi](#1-deskripsi-aplikasi)
 2. [Teknologi yang Digunakan](#2-teknologi-yang-digunakan)
-3. [Persiapan Sebelum Mulai](#3-persiapan-sebelum-mulai)
-4. [Cara Menjalankan Backend](#4-cara-menjalankan-backend)
-5. [Cara Menjalankan Frontend](#5-cara-menjalankan-frontend)
+3. [Struktur Repository](#3-struktur-repository)
+4. [Persiapan Sebelum Mulai](#4-persiapan-sebelum-mulai)
+5. [Cara Menjalankan Backend](#5-cara-menjalankan-backend)
 6. [Daftar Endpoint API](#6-daftar-endpoint-api)
-7. [Screenshot Aplikasi](#7-screenshot-aplikasi)
-8. [Identitas Pembuat](#8-identitas-pembuat)
-9. [Output](#output)
+7. [Identitas Pembuat](#7-identitas-pembuat)
+8. [Output Pengujian API](#8-output-pengujian-api)
 
 ---
 
 ## 1. Deskripsi Aplikasi
 
-Student Management REST API adalah aplikasi manajemen data siswa yang memungkinkan pengguna melakukan operasi **Create, Read, Update, dan Delete (CRUD)** terhadap data siswa. Aplikasi ini dilengkapi dengan fitur pencarian, filter berdasarkan kelas, pagination, upload foto siswa, validasi form, dan mode gelap pada sisi frontend.
+Aplikasi ini menyediakan operasi **Create, Read, Update, dan Delete (CRUD)** untuk dua data:
+
+- **Siswa**: NIS, nama, kelas, jurusan, alamat, foto, dan status aktif.
+- **User**: nama, email, password (disimpan dalam bentuk hash bcrypt), dan status aktif. User dipakai untuk **login** dan mendapatkan token JWT.
+
+Aplikasi mobile Flutter yang memakai API ini ada di folder [`../frontend`](../frontend/README.md).
 
 ## 2. Teknologi yang Digunakan
 
@@ -26,73 +30,100 @@ Student Management REST API adalah aplikasi manajemen data siswa yang memungkink
 |---|---|
 | Backend | Node.js, Express.js |
 | Database | MySQL (`mysql2`) |
-| Lainnya | CORS |
-| Frontend | HTML5, Tailwind CSS (CDN), JavaScript (Vanilla JS) |
+| Autentikasi | JSON Web Token (`jsonwebtoken`), hash password (`bcrypt`) |
+| Lainnya | CORS, dotenv |
 | Testing API | Postman |
-| Menjalankan Frontend | Live Server (ekstensi VS Code) |
 
-## 3. Persiapan Sebelum Mulai
+## 3. Struktur Repository
 
-Sebelum mengikuti langkah instalasi, pastikan sudah terpasang di komputer kamu:
-
-- **[Node.js](https://nodejs.org/)** (disarankan versi LTS) — cek dengan `node -v` di terminal
-- **[Git](https://git-scm.com/)** — untuk clone repository
-- **MySQL** (bisa lewat XAMPP, Laragon, atau instalasi langsung) — pastikan servicenya sudah menyala
-- **VS Code** dengan ekstensi **Live Server** — untuk menjalankan frontend
-- **Postman** — untuk mencoba endpoint API
-
-## 4. Cara Menjalankan Backend
-
-### Langkah 1 — Clone repository
-
-Buka **Git Bash** (atau terminal apa pun), lalu jalankan:
-
-```bash
-git clone https://github.com/MUFArd/student-management-rest-api.git
-cd student-management-rest-api
+```
+AppsSiswaFlutter/
+├── frontend/   # aplikasi mobile Flutter
+└── backend/    # REST API (dokumentasi ini)
+    ├── config/         # koneksi database
+    ├── src/
+    │   ├── controllers/  # SiswaController, UserController
+    │   ├── middlewares/  # Auth
+    │   └── routes/       # SiswaRoute, UserRoute
+    ├── server.js
+    └── student-management.sql
 ```
 
-### Langkah 2 — Install dependency
+## 4. Persiapan Sebelum Mulai
+
+Pastikan sudah terpasang:
+
+- **[Node.js](https://nodejs.org/)** (versi LTS), cek dengan `node -v`
+- **[Git](https://git-scm.com/)**
+- **MySQL** (lewat XAMPP, Laragon, atau instalasi langsung), pastikan servicenya sudah menyala
+- **Postman** (untuk mencoba endpoint)
+
+## 5. Cara Menjalankan Backend
+
+### Langkah 1: Clone repository
+
+```bash
+git clone https://github.com/MUFArd/AppsSiswaFlutter.git
+cd AppsSiswaFlutter/backend
+```
+
+### Langkah 2: Install dependency
 
 ```bash
 npm install
 ```
 
-Perintah ini akan membaca `package.json` dan mengunduh semua library yang dibutuhkan (Express, mysql2, cors, dll) ke folder `node_modules`.
+### Langkah 3: Buat database
 
-### Langkah 3 — Buat database
+1. Buka MySQL (phpMyAdmin, HeidiSQL, atau terminal).
+2. Buat database baru, misalnya `student_management`.
+3. Import file `student-management.sql`, atau jalankan query berikut.
 
-1. Buka MySQL kamu (lewat phpMyAdmin, HeidiSQL, atau terminal MySQL).
-2. Buat database baru, misalnya bernama `student_management`.
-3. Jalankan query berikut untuk membuat tabel `siswa`:
+**Tabel `siswa`**
 
 ```sql
 CREATE TABLE `siswa` (
-    `id` INT(10) NOT NULL AUTO_INCREMENT,
-    `nis` INT(10) NOT NULL,
-    `nama` VARCHAR(50) NOT NULL,
-    `kelas` VARCHAR(50) NOT NULL,
-    `jurusan` VARCHAR(50) NOT NULL,
-    `alamat` VARCHAR(50) NOT NULL,
-    `foto` LONGTEXT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `nis` (`nis`)
-);
+	`id` INT(10) NOT NULL AUTO_INCREMENT,
+	`nis` VARCHAR(50) NOT NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`nama` VARCHAR(50) NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`kelas` VARCHAR(50) NOT NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`jurusan` VARCHAR(50) NOT NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`alamat` VARCHAR(50) NOT NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`foto` LONGTEXT NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`is_active` ENUM('Y','N') NULL DEFAULT 'Y' COLLATE 'utf8mb4_0900_ai_ci',
+	`created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`deleted_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `nis` (`nis`) USING BTREE
+)
+COLLATE='utf8mb4_0900_ai_ci'
+ENGINE=InnoDB;
 ```
 
-### Langkah 4 — Atur koneksi database
+**Tabel `user`**
 
-Buka file `config/database.js`, sesuaikan kredensial berikut dengan MySQL kamu:
-
-```js
-host: process.env.DB_HOST,       // biasanya "localhost"
-user: process.env.DB_USER,       // biasanya "root"
-password: process.env.DB_PASS,   // kosongkan kalau MySQL kamu tanpa password
-database: process.env.DB_NAME    // nama database yang dibuat di Langkah 3
+```sql
+CREATE TABLE `user` (
+	`id` INT(10) NOT NULL AUTO_INCREMENT,
+	`name` VARCHAR(100) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`email` VARCHAR(100) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`password` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`is_active` ENUM('Y','N') NULL DEFAULT 'Y' COLLATE 'utf8mb4_0900_ai_ci',
+	`created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`deleted_at` TIMESTAMP NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE
+)
+COLLATE='utf8mb4_0900_ai_ci'
+ENGINE=InnoDB;
 ```
 
-Kalau project ini memakai file `.env`, buat file bernama `.env` di root project (sejajar `package.json`) lalu isi:
+> Catatan: kolom `nis` bertipe `VARCHAR`, jadi API mengirim NIS sebagai teks (contoh `"242510067"`). Kolom `is_active` berisi `Y` (aktif) atau `N` (tidak aktif).
+
+### Langkah 4: Atur file `.env`
+
+Buat file `.env` di folder `backend` (sejajar `package.json`). Kamu bisa menyalin dari `.env.example`, lalu isi sesuai komputer kamu:
 
 ```
 DB_HOST=localhost
@@ -103,41 +134,43 @@ DB_NAME=student_management
 PORT=3000
 ```
 
-### Langkah 5 — Jalankan server
+> File `.env` tidak ikut ke GitHub. Jangan pernah meng-commit password atau secret asli.
+
+### Langkah 5: Jalankan server
 
 ```bash
 node server.js
 ```
 
-Atau, kalau ingin server otomatis restart setiap ada perubahan kode (lebih enak untuk development):
+Atau dengan restart otomatis saat kode berubah:
 
 ```bash
 npx nodemon server.js
 ```
 
-### Langkah 6 — Cek server sudah jalan
+Kalau di terminal muncul `Berhasil terhubung ke database`, server siap dipakai di `http://localhost:3000`.
 
-Buka browser atau Postman, akses:
+### Langkah 6: Buat user pertama
 
+Login membutuhkan user yang sudah ada di database. Karena password disimpan dalam bentuk hash bcrypt, **jangan mengisi password langsung lewat SQL**. Buat user lewat endpoint `POST /user` di Postman:
+
+```json
+{
+    "name": "Admin",
+    "email": "admin@example.com",
+    "password": "rahasia123"
+}
 ```
-http://localhost:3000
-```
 
-Kalau muncul respons dari server (bukan error koneksi), berarti backend sudah berjalan dengan benar.
+Setelah itu coba `POST /user/login` dengan email dan password yang sama.
 
-## 5. Cara Menjalankan Frontend
+### Langkah 7: Jalankan aplikasi Flutter
 
-1. Buka folder project ini di **VS Code**.
-2. Masuk ke folder `page/`.
-3. Klik kanan pada `index.html` → pilih **Open with Live Server**.
-   - Kalau belum ada opsi ini, install dulu ekstensi **Live Server** dari tab Extensions VS Code.
-4. Sebelum dipakai, cek file `page/assets/js/script.js`, pastikan baris berikut sudah sesuai alamat backend kamu:
-   ```js
-   const API_BASE = 'http://localhost:3000/siswa';
-   ```
-5. Browser akan otomatis terbuka menampilkan halaman aplikasi. Pastikan backend (Langkah 4) sudah jalan dulu sebelum ini, karena frontend butuh mengambil data dari sana.
+Setelah backend berjalan, ikuti petunjuk di [`../frontend/README.md`](../frontend/README.md). Pengaturan `baseUrl` untuk emulator dan HP asli dijelaskan di sana.
 
 ## 6. Daftar Endpoint API
+
+### Siswa
 
 | Method | Endpoint | Deskripsi |
 |--------|----------|-----------|
@@ -147,12 +180,12 @@ Kalau muncul respons dari server (bukan error koneksi), berarti backend sudah be
 | PUT | `/siswa/:id` | Mengubah data siswa |
 | DELETE | `/siswa/:id` | Menghapus data siswa |
 
-**Contoh Body Request (POST/PUT `/siswa`):**
+**Contoh body (POST/PUT `/siswa`):**
 
 ```json
 {
-    "nis": 242510067,
-    "nama": "Muhammad Farel Andriani",
+    "nis": "242510067",
+    "nama": "Nama Siswa",
     "kelas": "XII RPL",
     "jurusan": "Rekayasa Perangkat Lunak",
     "alamat": "Sirsak",
@@ -160,42 +193,124 @@ Kalau muncul respons dari server (bukan error koneksi), berarti backend sudah be
 }
 ```
 
-> Tips buat yang baru belajar: coba dulu endpoint `GET /siswa` di Postman untuk memastikan koneksi database jalan, baru lanjut coba `POST` untuk menambah data.
+`foto` bersifat opsional.
 
-## 7. Screenshot Aplikasi
+### User
 
-**Halaman Daftar Siswa**
-![Daftar Siswa](./page/assets/img/daftarsiswa.png)
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| POST | `/user/login` | Login dan mendapatkan token JWT |
+| GET | `/user` | Mengambil seluruh data user |
+| GET | `/user/:id` | Mengambil data user berdasarkan ID |
+| POST | `/user` | Menambahkan user baru |
+| PUT | `/user/:id` | Mengubah user (password opsional) |
+| DELETE | `/user/:id` | Menghapus user |
 
-**Form Tambah/Ubah Siswa**
-![Form Siswa](./page/assets/img/formadd.png)
+**Contoh body login (`POST /user/login`):**
 
-**Mode Gelap**
-![Dark Mode](./page/assets/img/modegelap.png)
+```json
+{
+    "email": "admin@example.com",
+    "password": "rahasia123"
+}
+```
 
-## 8. Identitas Pembuat
+**Contoh body tambah user (`POST /user`):**
+
+```json
+{
+    "name": "Admin",
+    "email": "admin@example.com",
+    "password": "rahasia123"
+}
+```
+
+**Contoh body ubah user (`PUT /user/:id`):**
+
+```json
+{
+    "name": "Admin Baru",
+    "email": "admin@example.com",
+    "is_active": "Y",
+    "password": "passwordBaru123"
+}
+```
+
+`password` dan `is_active` bersifat opsional. Kalau `password` tidak dikirim, password lama tidak berubah.
+
+> Tips: coba `GET /siswa` atau `GET /user` di Postman lebih dulu untuk memastikan koneksi database berjalan, baru lanjut ke `POST`.
+
+## 7. Identitas Pembuat
 
 - **Nama:** Muhammad Farel Andriani
 - **Kelas:** 12 RPL
 - **Jurusan:** Rekayasa Perangkat Lunak
-- **Proyek:** Tugas REST API — Student Management System
+- **Proyek:** Tugas REST API, Student Management System
 
 ---
 
-## Output
+## 8. Output Pengujian API
 
-**Link GitHub:** https://github.com/MUFArd/student-management-rest-api
+**Link GitHub:** https://github.com/MUFArd/AppsSiswaFlutter
 
-**Screenshot Frontend:**
+### Pengujian REST API Siswa
 
-![Daftar Siswa](./page/assets/img/daftarsiswa.png)
-![Form Siswa](./page/assets/img/formadd.png)
-![Dark Mode](./page/assets/img/modegelap.png)
-
-**Screenshot Pengujian REST API:**
+**Get semua siswa** (`GET /siswa`)
 
 ![GetSiswaAll](./page/assets/img/getsiswaall.png)
+
+**Get siswa berdasarkan ID** (`GET /siswa/:id`)
+
 ![GetSiswaById](./page/assets/img/getsiswabyid.png)
+
+**Tambah siswa** (`POST /siswa`)
+
 ![CreateSiswa](./page/assets/img/createsiswa.png)
+
+**Ubah siswa** (`PUT /siswa/:id`)
+
 ![UpdateSiswa](./page/assets/img/updatesiswa.png)
+
+**Hapus siswa** (`DELETE /siswa/:id`)
+
 ![DeleteSiswa](./page/assets/img/deletesiswa.png)
+
+### Pengujian REST API User
+
+**Login** (`POST /user/login`)
+
+![LoginUser](./page/assets/img/loginuser.png)
+
+**Get semua user** (`GET /user`)
+
+![GetUserAll](./page/assets/img/getuserall.png)
+
+**Get user berdasarkan ID** (`GET /user/:id`)
+
+![GetUserById](./page/assets/img/getuserbyid.png)
+
+**Tambah user** (`POST /user`)
+
+![CreateUser](./page/assets/img/createuser.png)
+
+**Ubah user** (`PUT /user/:id`)
+
+![UpdateUser](./page/assets/img/updateuser.png)
+
+**Hapus user** (`DELETE /user/:id`)
+
+![DeleteUser](./page/assets/img/deleteuser.png)
+
+### Tampilan Aplikasi Flutter
+
+**Siswa**
+
+| Data Siswa | Tambah Siswa | Detail Siswa | Ubah Siswa |
+|:---:|:---:|:---:|:---:|
+| <img src="../frontend/docs/DataSiswaPage.png" width="160" alt="Data Siswa"> | <img src="../frontend/docs/AddSiswaPage.png" width="160" alt="Tambah Siswa"> | <img src="../frontend/docs/DetailSiswaPage.png" width="160" alt="Detail Siswa"> | <img src="../frontend/docs/UpdateSiswaPage.png" width="160" alt="Ubah Siswa"> |
+
+**User**
+
+| Data User | Tambah User | Detail User | Ubah User |
+|:---:|:---:|:---:|:---:|
+| <img src="../frontend/docs/DataUserPage.png" width="160" alt="Data User"> | <img src="../frontend/docs/AddUserPage.png" width="160" alt="Tambah User"> | <img src="../frontend/docs/DetailUserPage.png" width="160" alt="Detail User"> | <img src="../frontend/docs/UpdateUserPage.png" width="160" alt="Ubah User"> |

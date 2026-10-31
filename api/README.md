@@ -1,6 +1,6 @@
 # Student Management REST API
 
-REST API untuk mengelola data **siswa** dan **user** (login), dibuat dengan Node.js, Express, dan MySQL. API ini dipakai oleh aplikasi mobile Flutter di folder `../frontend`.
+REST API untuk mengelola data **siswa** dan **user** (login), dibuat dengan Node.js, Express, dan MySQL. API ini dipakai oleh aplikasi mobile Flutter di folder `../app`.
 
 ## Daftar Isi
 
@@ -22,7 +22,7 @@ Aplikasi ini menyediakan operasi **Create, Read, Update, dan Delete (CRUD)** unt
 - **Siswa**: NIS, nama, kelas, jurusan, alamat, foto, dan status aktif.
 - **User**: nama, email, password (disimpan dalam bentuk hash bcrypt), dan status aktif. User dipakai untuk **login** dan mendapatkan token JWT.
 
-Aplikasi mobile Flutter yang memakai API ini ada di folder [`../frontend`](../frontend/README.md).
+Aplikasi mobile Flutter yang memakai API ini ada di folder [`../app`](../app/README.md).
 
 ## 2. Teknologi yang Digunakan
 
@@ -38,8 +38,8 @@ Aplikasi mobile Flutter yang memakai API ini ada di folder [`../frontend`](../fr
 
 ```
 AppsSiswaFlutter/
-├── frontend/   # aplikasi mobile Flutter
-└── backend/    # REST API (dokumentasi ini)
+├── app/   # aplikasi mobile Flutter
+└── api/    # REST API (dokumentasi ini)
     ├── config/         # koneksi database
     ├── src/
     │   ├── controllers/  # SiswaController, UserController
@@ -64,7 +64,7 @@ Pastikan sudah terpasang:
 
 ```bash
 git clone https://github.com/MUFArd/AppsSiswaFlutter.git
-cd AppsSiswaFlutter/backend
+cd AppsSiswaFlutter/api
 ```
 
 ### Langkah 2: Install dependency
@@ -123,7 +123,7 @@ ENGINE=InnoDB;
 
 ### Langkah 4: Atur file `.env`
 
-Buat file `.env` di folder `backend` (sejajar `package.json`). Kamu bisa menyalin dari `.env.example`, lalu isi sesuai komputer kamu:
+Buat file `.env` di folder `api` (sejajar `package.json`). Kamu bisa menyalin dari `.env.example`, lalu isi sesuai komputer kamu:
 
 ```
 DB_HOST=localhost
@@ -166,7 +166,7 @@ Setelah itu coba `POST /user/login` dengan email dan password yang sama.
 
 ### Langkah 7: Jalankan aplikasi Flutter
 
-Setelah backend berjalan, ikuti petunjuk di [`../frontend/README.md`](../frontend/README.md). Pengaturan `baseUrl` untuk emulator dan HP asli dijelaskan di sana.
+Setelah backend berjalan, ikuti petunjuk di [`../app/README.md`](../app/README.md). Pengaturan `baseUrl` untuk emulator dan HP asli dijelaskan di sana.
 
 ## 6. Daftar Endpoint API
 
@@ -307,10 +307,10 @@ Setelah backend berjalan, ikuti petunjuk di [`../frontend/README.md`](../fronten
 
 | Data Siswa | Tambah Siswa | Detail Siswa | Ubah Siswa |
 |:---:|:---:|:---:|:---:|
-| <img src="../frontend/docs/DataSiswaPage.png" width="160" alt="Data Siswa"> | <img src="../frontend/docs/AddSiswaPage.png" width="160" alt="Tambah Siswa"> | <img src="../frontend/docs/DetailSiswaPage.png" width="160" alt="Detail Siswa"> | <img src="../frontend/docs/UpdateSiswaPage.png" width="160" alt="Ubah Siswa"> |
+| <img src="../app/docs/DataSiswaPage.png" width="160" alt="Data Siswa"> | <img src="../app/docs/AddSiswaPage.png" width="160" alt="Tambah Siswa"> | <img src="../app/docs/DetailSiswaPage.png" width="160" alt="Detail Siswa"> | <img src="../app/docs/UpdateSiswaPage.png" width="160" alt="Ubah Siswa"> |
 
 **User**
 
 | Data User | Tambah User | Detail User | Ubah User |
 |:---:|:---:|:---:|:---:|
-| <img src="../frontend/docs/DataUserPage.png" width="160" alt="Data User"> | <img src="../frontend/docs/AddUserPage.png" width="160" alt="Tambah User"> | <img src="../frontend/docs/DetailUserPage.png" width="160" alt="Detail User"> | <img src="../frontend/docs/UpdateUserPage.png" width="160" alt="Ubah User"> |
+| <img src="../app/docs/DataUserPage.png" width="160" alt="Data User"> | <img src="../app/docs/AddUserPage.png" width="160" alt="Tambah User"> | <img src="../app/docs/DetailUserPage.png" width="160" alt="Detail User"> | <img src="../app/docs/UpdateUserPage.png" width="160" alt="Ubah User"> |

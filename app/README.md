@@ -1,6 +1,6 @@
 # Apps Siswa (Frontend)
 
-Aplikasi mobile Flutter untuk mengelola data **User** dan **Siswa**. Aplikasi terhubung ke REST API (Express + MySQL) di folder `../backend`.
+Aplikasi mobile Flutter untuk mengelola data **User** dan **Siswa**. Aplikasi terhubung ke REST API (Express + MySQL) di folder `../api`.
 
 ## Fitur
 
@@ -48,14 +48,14 @@ Aplikasi mobile Flutter untuk mengelola data **User** dan **Siswa**. Aplikasi te
 
 ```
 AppsSiswaFlutter/
-├── frontend/   # aplikasi Flutter
-└── backend/    # REST API Express + MySQL
+├── app/   # aplikasi Flutter
+└── api/    # REST API Express + MySQL
 ```
 
 ## Struktur Folder Frontend
 
 ```
-frontend/
+app/
 ├── docs/         # screenshot aplikasi
 └── lib/
     ├── main.dart
@@ -87,12 +87,12 @@ cd AppsSiswaFlutter
 ## Menyiapkan Backend
 
 ```bash
-cd backend
+cd api
 npm install
 ```
 
-1. Jalankan MySQL, lalu buat database dan import file `.sql` dari folder `backend` (jika tersedia).
-2. Buat file `.env` di folder `backend` (salin dari `.env.example`), lalu isi sesuai komputer kamu.
+1. Jalankan MySQL, lalu buat database dan import file `.sql` dari folder `api` (jika tersedia).
+2. Buat file `.env` di folder `api` (salin dari `.env.example`), lalu isi sesuai komputer kamu.
 3. Jalankan server:
 
    ```bash
@@ -113,7 +113,7 @@ Server berjalan di `http://localhost:3000`. Kalau di terminal muncul `Berhasil t
 2. Buka terminal baru, lalu pasang dependency:
 
    ```bash
-   cd frontend
+   cd app
    flutter pub get
    ```
 
@@ -169,7 +169,7 @@ Lakukan **Hot Restart** atau stop lalu run ulang. Hot reload biasa tidak menjala
 | GET, POST | `/siswa` | Daftar dan tambah siswa |
 | PUT, DELETE | `/siswa/:id` | Ubah dan hapus siswa |
 
-Dokumentasi lengkap API ada di folder `backend`.
+Dokumentasi lengkap API ada di folder `api`.
 
 ## Author
 
